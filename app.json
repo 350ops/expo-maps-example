@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "expo-maps-example",
-    "slug": "expo-maps-example",
+    "name": "Maldives Seaplanes",
+    "slug": "maldives-seaplanes",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "expomapsexample",
+    "scheme": "maldivesseaplanes",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.example.maldivesseaplanes",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -19,17 +20,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "permissions": [
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
-      ],
-      "config": {
-        "googleMaps": {
-          "apiKey": "your-api-key-here"
-        }
-      },
-      "package": "com.betoatexpo.expomapsexample"
+      "package": "com.example.maldivesseaplanes"
     },
     "web": {
       "bundler": "metro",
@@ -50,7 +41,7 @@
       [
         "expo-maps",
         {
-          "requestLocationPermission": "true",
+          "requestLocationPermission": "false",
           "locationPermission": "Allow $(PRODUCT_NAME) to use your location"
         }
       ]
@@ -62,7 +53,9 @@
       "router": {},
       "eas": {
         "projectId": "6a197334-3cdd-4185-894d-a463608b290a"
-      }
+      },
+      "openSkyClientId": "",
+      "openSkyClientSecret": ""
     },
     "owner": "betoatexpo"
   }

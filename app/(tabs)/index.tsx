@@ -54,10 +54,10 @@ export default function MapScreen() {
     return approaches.map((t) => ({
       id: t.id,
       color:
-        t.source === 'opensky'
+        t.source === 'adsbx'
           ? 'rgba(10,132,255,0.95)'
           : 'rgba(255,159,10,0.55)',
-      width: t.source === 'opensky' ? 3 : 2,
+      width: t.source === 'adsbx' ? 3 : 2,
       contourStyle: AppleMapsContourStyle.GEODESIC,
       coordinates: t.points.map((p) => ({ latitude: p.lat, longitude: p.lon })),
     }));

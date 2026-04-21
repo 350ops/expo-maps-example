@@ -53,9 +53,7 @@
       "router": {},
       "eas": {
         "projectId": "6a197334-3cdd-4185-894d-a463608b290a"
-      },
-      "openSkyClientId": "",
-      "openSkyClientSecret": ""
+      }
     },
     "owner": "betoatexpo"
   }

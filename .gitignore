@@ -40,3 +40,6 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# baker cache (ADS-B Exchange trace samples)
+.cache/

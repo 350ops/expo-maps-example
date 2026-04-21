@@ -7,7 +7,7 @@ export type TrajectoryPoint = {
   t: number;
 };
 
-export type Source = 'opensky' | 'synthetic';
+export type Source = 'adsbx' | 'synthetic';
 
 export type Trajectory = {
   id: string;

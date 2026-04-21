@@ -45,10 +45,10 @@ export function ApproachInfoCard({ trajectory, onClose }: Props) {
         <Text
           style={[
             styles.badge,
-            trajectory.source === 'opensky' ? styles.badgeReal : styles.badgeSynth,
+            trajectory.source === 'adsbx' ? styles.badgeReal : styles.badgeSynth,
           ]}
         >
-          {trajectory.source === 'opensky' ? 'Real (OpenSky)' : 'Synthetic'}
+          {trajectory.source === 'adsbx' ? 'Real (ADS-B Exchange)' : 'Synthetic'}
         </Text>
       </View>
 

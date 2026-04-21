@@ -10,7 +10,7 @@ type Props = {
 };
 
 export function MapOverlay({ resortName, approaches, loading, onOpenMenu }: Props) {
-  const realCount = approaches?.filter((t) => t.source === 'opensky').length ?? 0;
+  const realCount = approaches?.filter((t) => t.source === 'adsbx').length ?? 0;
   const syntheticCount = approaches?.filter((t) => t.source === 'synthetic').length ?? 0;
 
   return (

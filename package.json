@@ -9,7 +9,9 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "postinstall": "node ./scripts/ensure-expo-module-scripts-tsconfig-base.mjs"
+    "postinstall": "node ./scripts/ensure-expo-module-scripts-tsconfig-base.mjs",
+    "contours:run": "python scripts/contours/contour_pipeline.py",
+    "contours:deps": "pip install -r scripts/contours/requirements.txt"
   },
   "dependencies": {
     "@expo/ui": "~55.0.11",

@@ -23,6 +23,26 @@ First, install the required dependencies:
 npx expo install expo-maps
 ```
 
+
+## Contour Extraction Tool (Python)
+
+The contour extraction pipeline is a **CLI tool**, not an in-app screen yet.
+
+Use it from your terminal at the repo root:
+
+```bash
+npm run contours:deps
+npm run contours:run -- \
+  --input /absolute/path/to/map.pdf \
+  --gcps /absolute/path/to/gcps.csv \
+  --epsg 32643 \
+  --outdir contour_output
+```
+
+Outputs are written to your `--outdir` folder (`map_georeferenced.tif`, `map_classes.tif`, `contour_bands.gpkg`).
+
+If you want this available inside the mobile app UI, the next step is wiring a backend endpoint/job that runs this script and returns the generated GeoPackage/GeoJSON for display.
+
 ## Configuration
 
 ### Android Configuration

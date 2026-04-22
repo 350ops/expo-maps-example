@@ -45,7 +45,7 @@ function generateOne(resort: Resort, index: number): Trajectory {
   const points: TrajectoryPoint[] = [];
 
   const now = Math.floor(Date.now() / 1000);
-  const daysAgo = 1 + rand() * 13;
+  const daysAgo = rand() * 3;
   const landedAt = now - Math.floor(daysAgo * 86400) - Math.floor(rand() * 43200);
 
   const cruiseDurationSec = Math.floor((totalDistNm / 150) * 3600);

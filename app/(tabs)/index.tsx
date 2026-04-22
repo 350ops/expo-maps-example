@@ -14,7 +14,6 @@ import { nmToMeters } from '@/utils/geo';
 import { ResortSheet } from '@/components/ResortSheet';
 import { MapOverlay } from '@/components/MapOverlay';
 import { ApproachInfoCard } from '@/components/ApproachInfoCard';
-import type { Trajectory } from '@/services/flights/types';
 
 const OVERVIEW_ZOOM = 9;
 const RESORT_ZOOM = 12;
@@ -104,10 +103,10 @@ export default function MapScreen() {
     return Math.max(60, Math.round(22 * metersPerPt));
   }, [zoom]);
 
-  const selectedTrajectory: Trajectory | null = useMemo(() => {
-    if (!selectedTrajectoryId || !approaches) return null;
-    return approaches.find((t) => t.id === selectedTrajectoryId) ?? null;
-  }, [selectedTrajectoryId, approaches]);
+  const hasSelection =
+    !!selectedTrajectoryId &&
+    !!approaches &&
+    approaches.some((t) => t.id === selectedTrajectoryId);
 
   if (Platform.OS !== 'ios') {
     return (
@@ -186,9 +185,11 @@ export default function MapScreen() {
           onOpenMenu={handleOpenMenu}
         />
       </SafeAreaView>
-      {selectedTrajectory ? (
+      {hasSelection && approaches ? (
         <ApproachInfoCard
-          trajectory={selectedTrajectory}
+          trajectories={approaches}
+          currentId={selectedTrajectoryId!}
+          onChange={setSelectedTrajectoryId}
           onClose={() => setSelectedTrajectoryId(null)}
         />
       ) : null}

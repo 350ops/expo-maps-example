@@ -19,7 +19,7 @@ export function useApproaches(resort: Resort | null): State {
     }
     let cancelled = false;
     setState({ data: null, loading: true, error: null });
-    getApproaches(resort, 30)
+    getApproaches(resort, 3)
       .then((data) => {
         if (!cancelled) setState({ data, loading: false, error: null });
       })

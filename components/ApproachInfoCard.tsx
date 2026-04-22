@@ -1,12 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native';
 import type { Trajectory } from '../services/flights/types';
 import { fetchWindAt } from '../services/weather';
 import type { Wind } from '../services/weather/types';
 import { bearingDeg, distanceNm } from '../utils/geo';
 
 type Props = {
-  trajectory: Trajectory;
+  trajectories: Trajectory[];
+  currentId: string;
+  onChange: (id: string) => void;
   onClose: () => void;
 };
 
@@ -42,7 +54,79 @@ function formatSpeedKn(knots: number): string {
   return `${Math.round(knots)} kn`;
 }
 
-export function ApproachInfoCard({ trajectory, onClose }: Props) {
+export function ApproachInfoCard({ trajectories, currentId, onChange, onClose }: Props) {
+  const { width } = useWindowDimensions();
+  const listRef = useRef<FlatList<Trajectory>>(null);
+  const rawIndex = trajectories.findIndex((t) => t.id === currentId);
+  const currentIndex = rawIndex < 0 ? 0 : rawIndex;
+
+  useEffect(() => {
+    if (trajectories.length === 0) return;
+    listRef.current?.scrollToIndex({ index: currentIndex, animated: true });
+  }, [currentIndex, trajectories.length]);
+
+  const handleMomentumScrollEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const i = Math.round(e.nativeEvent.contentOffset.x / width);
+      const next = trajectories[i];
+      if (next && next.id !== currentId) onChange(next.id);
+    },
+    [trajectories, currentId, onChange, width],
+  );
+
+  if (trajectories.length === 0) return null;
+
+  return (
+    <View style={styles.carousel} pointerEvents="box-none">
+      <FlatList
+        ref={listRef}
+        data={trajectories}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={(t) => t.id}
+        initialScrollIndex={currentIndex}
+        getItemLayout={(_, index) => ({
+          length: width,
+          offset: width * index,
+          index,
+        })}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
+        renderItem={({ item, index }) => (
+          <View style={[styles.page, { width }]} pointerEvents="box-none">
+            <ApproachCardContent
+              trajectory={item}
+              pageLabel={`${index + 1} of ${trajectories.length}`}
+              onClose={onClose}
+            />
+          </View>
+        )}
+      />
+      {trajectories.length > 1 ? (
+        <View style={styles.dotsWrap} pointerEvents="none">
+          <View style={styles.dotsPill}>
+            {trajectories.map((t, i) => (
+              <View
+                key={t.id}
+                style={[styles.dot, i === currentIndex && styles.dotActive]}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function ApproachCardContent({
+  trajectory,
+  pageLabel,
+  onClose,
+}: {
+  trajectory: Trajectory;
+  pageLabel: string;
+  onClose: () => void;
+}) {
   const [wind, setWind] = useState<WindState>('loading');
   const firstPoint = trajectory.points[0];
   const lastPoint = trajectory.points[trajectory.points.length - 1];
@@ -86,8 +170,11 @@ export function ApproachInfoCard({ trajectory, onClose }: Props) {
   return (
     <View style={styles.card} pointerEvents="auto">
       <View style={styles.header}>
-        <View>
-          <Text style={styles.callsign}>{trajectory.callsign}</Text>
+        <View style={styles.headerLeft}>
+          <View style={styles.titleRow}>
+            <Text style={styles.callsign}>{trajectory.callsign}</Text>
+            <Text style={styles.pageLabel}>{pageLabel}</Text>
+          </View>
           <Text style={styles.time}>
             Landed: {formatLandedAt(trajectory.landedAt)} MVT
           </Text>
@@ -180,11 +267,39 @@ export function ApproachInfoCard({ trajectory, onClose }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card: {
+  carousel: {
     position: 'absolute',
-    left: 16,
-    right: 16,
+    left: 0,
+    right: 0,
     bottom: 96,
+  },
+  page: {
+    paddingHorizontal: 16,
+  },
+  dotsWrap: {
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  dotsPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(15,23,32,0.55)',
+    borderRadius: 12,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.55)',
+  },
+  dotActive: {
+    backgroundColor: '#fff',
+    width: 18,
+  },
+  card: {
     backgroundColor: 'rgba(255,255,255,0.97)',
     borderRadius: 16,
     padding: 14,
@@ -199,9 +314,24 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 8,
   },
+  headerLeft: {
+    flex: 1,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
+  },
   callsign: {
     fontSize: 17,
     fontWeight: '700',
+  },
+  pageLabel: {
+    fontSize: 11,
+    color: '#8A929B',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
   time: {
     marginTop: 2,

@@ -1,11 +1,15 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Trajectory } from '../services/flights/types';
+import { fetchWindAt } from '../services/weather';
+import type { Wind } from '../services/weather/types';
 
 type Props = {
   trajectory: Trajectory;
   onClose: () => void;
 };
+
+type WindState = Wind | null | 'loading';
 
 function formatLandedAt(epochSec: number): string {
   const d = new Date(epochSec * 1000);
@@ -25,7 +29,22 @@ function compassLabel(deg: number): string {
 }
 
 export function ApproachInfoCard({ trajectory, onClose }: Props) {
-  const wind = trajectory.windAtLanding;
+  const [wind, setWind] = useState<WindState>('loading');
+
+  useEffect(() => {
+    setWind('loading');
+    const last = trajectory.points[trajectory.points.length - 1];
+    if (!last) {
+      setWind(null);
+      return;
+    }
+    let cancelled = false;
+    fetchWindAt(last.lat, last.lon, trajectory.landedAt)
+      .then((w) => { if (!cancelled) setWind(w); })
+      .catch(() => { if (!cancelled) setWind(null); });
+    return () => { cancelled = true; };
+  }, [trajectory.id]);
+
   return (
     <View style={styles.card} pointerEvents="auto">
       <View style={styles.header}>
@@ -41,20 +60,30 @@ export function ApproachInfoCard({ trajectory, onClose }: Props) {
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.label}>Trajectory</Text>
-        <Text
-          style={[
-            styles.badge,
-            trajectory.source === 'adsbx' ? styles.badgeReal : styles.badgeSynth,
-          ]}
-        >
-          {trajectory.source === 'adsbx' ? 'Real (ADS-B Exchange)' : 'Synthetic'}
-        </Text>
+        <Text style={styles.label}>Source</Text>
+        <View style={styles.rowRight}>
+          {trajectory.source === 'adsbx' && trajectory.icao24 ? (
+            <Text style={styles.icao}>{trajectory.icao24.toUpperCase()}</Text>
+          ) : null}
+          <Text
+            style={[
+              styles.badge,
+              trajectory.source === 'adsbx' ? styles.badgeReal : styles.badgeSynth,
+            ]}
+          >
+            {trajectory.source === 'adsbx' ? 'ADS-B Exchange' : 'Synthetic'}
+          </Text>
+        </View>
       </View>
 
       <View style={styles.row}>
         <Text style={styles.label}>Wind at landing</Text>
-        {wind ? (
+        {wind === 'loading' ? (
+          <View style={styles.windBlock}>
+            <ActivityIndicator size="small" color="#0A84FF" />
+            <Text style={styles.loadingText}>Fetching wind…</Text>
+          </View>
+        ) : wind ? (
           <View style={styles.windBlock}>
             <Text
               style={[
@@ -127,6 +156,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#555',
   },
+  rowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  icao: {
+    fontSize: 11,
+    color: '#888',
+    fontVariant: ['tabular-nums'],
+  },
   badge: {
     fontSize: 12,
     fontWeight: '600',
@@ -160,6 +199,11 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#888',
     marginLeft: 4,
+  },
+  loadingText: {
+    fontSize: 13,
+    color: '#888',
+    fontStyle: 'italic',
   },
   unavailable: {
     fontSize: 13,

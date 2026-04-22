@@ -135,6 +135,7 @@ export default function MapScreen() {
         circles={circles}
         markers={markers}
         onMarkerClick={(event) => {
+          if (!event.id) return;
           const resortId = event.id.replace('resort-', '');
           const resort = RESORTS.find((r) => r.id === resortId);
           if (resort) {

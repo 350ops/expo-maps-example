@@ -6,10 +6,11 @@ type Props = {
   resortName: string | null;
   approaches: Trajectory[] | null;
   loading: boolean;
+  error: Error | null;
   onOpenMenu: () => void;
 };
 
-export function MapOverlay({ resortName, approaches, loading, onOpenMenu }: Props) {
+export function MapOverlay({ resortName, approaches, loading, error, onOpenMenu }: Props) {
   const realCount = approaches?.filter((t) => t.source === 'adsbx').length ?? 0;
   const syntheticCount = approaches?.filter((t) => t.source === 'synthetic').length ?? 0;
 
@@ -22,7 +23,9 @@ export function MapOverlay({ resortName, approaches, loading, onOpenMenu }: Prop
           ) : (
             <Text style={styles.chipTitle}>Maldives Seaplanes</Text>
           )}
-          {approaches && !loading ? (
+          {error ? (
+            <Text style={[styles.chipLegend, styles.chipError]}>Failed to load approaches</Text>
+          ) : approaches && !loading ? (
             <Text style={styles.chipLegend}>
               <Text style={styles.dotReal}>●</Text> {realCount} real{'  '}
               <Text style={styles.dotSynthetic}>●</Text> {syntheticCount} synthetic
@@ -65,6 +68,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontSize: 12,
     color: '#666',
+  },
+  chipError: {
+    color: '#FF3B30',
   },
   dotReal: {
     color: '#0A84FF',

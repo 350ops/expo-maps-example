@@ -25,7 +25,7 @@ export default function MapScreen() {
   const [selectedResort, setSelectedResort] = useState<Resort | null>(null);
   const [selectedTrajectoryId, setSelectedTrajectoryId] = useState<string | null>(null);
 
-  const { data: approaches, loading } = useApproaches(selectedResort);
+  const { data: approaches, loading, error } = useApproaches(selectedResort);
 
   const initialCamera = useMemo(
     () => ({
@@ -130,6 +130,7 @@ export default function MapScreen() {
           resortName={selectedResort?.name ?? null}
           approaches={approaches}
           loading={loading}
+          error={error}
           onOpenMenu={handleOpenMenu}
         />
       </SafeAreaView>

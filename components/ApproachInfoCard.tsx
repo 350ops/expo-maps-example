@@ -60,15 +60,20 @@ export function ApproachInfoCard({ trajectory, onClose }: Props) {
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.label}>Trajectory</Text>
-        <Text
-          style={[
-            styles.badge,
-            trajectory.source === 'adsbx' ? styles.badgeReal : styles.badgeSynth,
-          ]}
-        >
-          {trajectory.source === 'adsbx' ? 'Real (ADS-B Exchange)' : 'Synthetic'}
-        </Text>
+        <Text style={styles.label}>Source</Text>
+        <View style={styles.rowRight}>
+          {trajectory.source === 'adsbx' && trajectory.icao24 ? (
+            <Text style={styles.icao}>{trajectory.icao24.toUpperCase()}</Text>
+          ) : null}
+          <Text
+            style={[
+              styles.badge,
+              trajectory.source === 'adsbx' ? styles.badgeReal : styles.badgeSynth,
+            ]}
+          >
+            {trajectory.source === 'adsbx' ? 'ADS-B Exchange' : 'Synthetic'}
+          </Text>
+        </View>
       </View>
 
       <View style={styles.row}>
@@ -150,6 +155,16 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     color: '#555',
+  },
+  rowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  icao: {
+    fontSize: 11,
+    color: '#888',
+    fontVariant: ['tabular-nums'],
   },
   badge: {
     fontSize: 12,

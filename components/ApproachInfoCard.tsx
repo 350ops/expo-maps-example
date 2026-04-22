@@ -171,8 +171,20 @@ export function ApproachInfoCard({ trajectory, onClose }: Props) {
 
       <View style={styles.metricGrid}>
         <View style={styles.metricCell}>
+          <Text style={styles.metricLabel}>Track distance</Text>
+          <Text style={styles.metricValue}>{pathDistanceNm.toFixed(1)} nm</Text>
+        </View>
+        <View style={styles.metricCell}>
+          <Text style={styles.metricLabel}>Flight time</Text>
+          <Text style={styles.metricValue}>{formatDuration(elapsedSec)}</Text>
+        </View>
+        <View style={styles.metricCell}>
+          <Text style={styles.metricLabel}>Avg ground speed</Text>
+          <Text style={styles.metricValue}>{formatSpeedKn(avgGroundSpeedKn)}</Text>
+        </View>
+        <View style={styles.metricCell}>
           <Text style={styles.metricLabel}>Peak altitude</Text>
-          <Text style={styles.metricValue}>{formatNumber(maxAltFt)} ft</Text>
+          <Text style={styles.metricValue}>{maxAltFt.toFixed(0)} ft</Text>
         </View>
         <View style={styles.metricCell}>
           <Text style={styles.metricLabel}>Final course</Text>
@@ -183,16 +195,8 @@ export function ApproachInfoCard({ trajectory, onClose }: Props) {
           </Text>
         </View>
         <View style={styles.metricCell}>
-          <Text style={styles.metricLabel}>Samples</Text>
-          <Text style={styles.metricValue}>{trajectory.points.length} points</Text>
-        </View>
-        <View style={styles.metricCell}>
-          <Text style={styles.metricLabel}>Data quality</Text>
-          <Text
-            style={styles.metricValue}
-          >
-            {trajectory.source === 'adsbx' ? 'Observed' : 'Modeled'}
-          </Text>
+          <Text style={styles.metricLabel}>Points sampled</Text>
+          <Text style={styles.metricValue}>{trajectory.points.length}</Text>
         </View>
       </View>
     </View>
@@ -351,26 +355,26 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   metricGrid: {
-    marginTop: 10,
+    marginTop: 6,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 9,
+    gap: 8,
   },
   metricCell: {
     width: '48%',
-    backgroundColor: 'rgba(37, 51, 72, 0.5)',
-    borderRadius: 12,
+    backgroundColor: '#F4F6F8',
+    borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
   metricLabel: {
     fontSize: 11,
-    color: '#97ABBF',
+    color: '#67717B',
     marginBottom: 2,
   },
   metricValue: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#EEF5FF',
+    color: '#0F1720',
   },
 });

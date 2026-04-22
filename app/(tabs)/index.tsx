@@ -52,6 +52,13 @@ export default function MapScreen() {
     });
   }, []);
 
+  // Automatically select the first trajectory when approaches load for a resort at high zoom
+  React.useEffect(() => {
+    if (selectedResort && zoom >= RESORT_ZOOM && approaches && approaches.length > 0 && !selectedTrajectoryId) {
+      setSelectedTrajectoryId(approaches[0].id);
+    }
+  }, [approaches, selectedResort, zoom]);
+
   const polylines = useMemo(() => {
     if (!approaches) return [];
     return approaches.map((t) => ({
@@ -81,16 +88,13 @@ export default function MapScreen() {
   }, [selectedResort]);
 
   const markers = useMemo(() => {
-    if (!selectedResort) return [];
-    return [
-      {
-        id: `resort-${selectedResort.id}`,
-        coordinates: selectedResort.coord,
-        title: selectedResort.name,
-        tintColor: '#0A84FF',
-        systemImage: 'mappin.circle.fill',
-      },
-    ];
+    return RESORTS.map((resort) => ({
+      id: `resort-${resort.id}`,
+      coordinates: resort.coord,
+      title: resort.name,
+      tintColor: resort.id === selectedResort?.id ? '#0A84FF' : '#999',
+      systemImage: resort.id === selectedResort?.id ? 'mappin.circle.fill' : 'mappin.circle',
+    }));
   }, [selectedResort]);
 
   // expo-maps measures polyline tap tolerance in real-world meters, so a fixed
@@ -130,6 +134,26 @@ export default function MapScreen() {
         polylines={polylines}
         circles={circles}
         markers={markers}
+        onMarkerClick={(event) => {
+          const resortId = event.id.replace('resort-', '');
+          const resort = RESORTS.find((r) => r.id === resortId);
+          if (resort) {
+            if (resort.id === selectedResort?.id) {
+              // Toggle or ensure card is shown if zoomed in
+              if (zoom >= RESORT_ZOOM && approaches && approaches.length > 0) {
+                setSelectedTrajectoryId(approaches[0].id);
+              } else {
+                // Zoom in if not already
+                mapRef.current?.setCameraPosition({
+                  coordinates: resort.coord,
+                  zoom: RESORT_ZOOM,
+                });
+              }
+            } else {
+              handleSelectResort(resort);
+            }
+          }
+        }}
         onPolylineClick={(event) => {
           if (event.id) {
             polylineTappedRef.current = true;
@@ -144,7 +168,13 @@ export default function MapScreen() {
           setSelectedTrajectoryId(null);
         }}
         onCameraMove={(event) => {
-          if (typeof event.zoom === 'number') setZoom(event.zoom);
+          if (typeof event.zoom === 'number') {
+            setZoom(event.zoom);
+            // Auto-hide card if zooming out far from the resort
+            if (event.zoom < RESORT_ZOOM - 1.5 && selectedTrajectoryId) {
+              setSelectedTrajectoryId(null);
+            }
+          }
         }}
       />
       <SafeAreaView style={styles.overlayRoot} pointerEvents="box-none">

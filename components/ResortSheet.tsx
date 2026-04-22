@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     color: '#6b6b6b',
   },
   list: {
-    paddingBottom: 32,
+    paddingBottom: 120,
   },
   row: {
     flexDirection: 'row',

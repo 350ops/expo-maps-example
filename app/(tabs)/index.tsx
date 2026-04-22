@@ -17,7 +17,7 @@ import { ApproachInfoCard } from '@/components/ApproachInfoCard';
 import type { Trajectory } from '@/services/flights/types';
 
 const OVERVIEW_ZOOM = 9;
-const RESORT_ZOOM = 8.5;
+const RESORT_ZOOM = 12;
 
 export default function MapScreen() {
   const mapRef = useRef<AppleMaps.MapView>(null);

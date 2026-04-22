@@ -24,6 +24,9 @@ export default function MapScreen() {
   const sheetRef = useRef<BottomSheetModal>(null);
   const [selectedResort, setSelectedResort] = useState<Resort | null>(null);
   const [selectedTrajectoryId, setSelectedTrajectoryId] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(OVERVIEW_ZOOM);
+  // Native fires onMapClick after onPolylineClick on the same tap; swallow it.
+  const polylineTappedRef = useRef(false);
 
   const { data: approaches, loading, error } = useApproaches(selectedResort);
 
@@ -90,6 +93,13 @@ export default function MapScreen() {
     ];
   }, [selectedResort]);
 
+  // expo-maps measures polyline tap tolerance in real-world meters, so a fixed
+  // value collapses to sub-pixel at close zooms. Scale it to ~22pt of slop.
+  const polylineTapThreshold = useMemo(() => {
+    const metersPerPt = (360 * 111_000) / (Math.pow(2, zoom) * 390);
+    return Math.max(60, Math.round(22 * metersPerPt));
+  }, [zoom]);
+
   const selectedTrajectory: Trajectory | null = useMemo(() => {
     if (!selectedTrajectoryId || !approaches) return null;
     return approaches.find((t) => t.id === selectedTrajectoryId) ?? null;
@@ -115,15 +125,27 @@ export default function MapScreen() {
           isTrafficEnabled: false,
           mapType: AppleMapsMapType.HYBRID,
           selectionEnabled: true,
-          polylineTapThreshold: 24,
+          polylineTapThreshold,
         }}
         polylines={polylines}
         circles={circles}
         markers={markers}
         onPolylineClick={(event) => {
-          if (event.id) setSelectedTrajectoryId(event.id);
+          if (event.id) {
+            polylineTappedRef.current = true;
+            setSelectedTrajectoryId(event.id);
+          }
         }}
-        onMapClick={() => setSelectedTrajectoryId(null)}
+        onMapClick={() => {
+          if (polylineTappedRef.current) {
+            polylineTappedRef.current = false;
+            return;
+          }
+          setSelectedTrajectoryId(null);
+        }}
+        onCameraMove={(event) => {
+          if (typeof event.zoom === 'number') setZoom(event.zoom);
+        }}
       />
       <SafeAreaView style={styles.overlayRoot} pointerEvents="box-none">
         <MapOverlay
